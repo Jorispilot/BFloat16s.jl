@@ -5,7 +5,7 @@ import Base: isfinite, isnan, precision, iszero, eps,
     +, -, *, /, ^, ==, <, <=, >=, >, !=, inv,
     abs, sqrt, exp, log, log2, log10, sin, cos, tan, asin,
     acos, atan, sinh, cosh, tanh, asinh, acosh, atan,
-    exponent,
+    exponent, ldexp, frexp,
     bitstring
 
 primitive type BFloat16 <: AbstractFloat 16 end
@@ -85,6 +85,11 @@ function Base.Float64(x::BFloat16)
     Float64(Float32(x))
 end
 
+# Expansion to BigFloat
+function Base.BigFloat(x::BFloat16)
+    BigFloat(Float32(x))
+end
+
 # Truncation to integer types
 Base.unsafe_trunc(T::Type{<:Integer}, x::BFloat16) = unsafe_trunc(T, Float32(x))
 
@@ -161,6 +166,8 @@ randexp(rng::AbstractRNG, ::Type{BFloat16}) = convert(BFloat16, randexp(rng))
           
 # Exponent
 exponent(x::BFloat16) = exponent(Float32(x))
+ldexp(x::BFloat16, q::Integer) = BFloat16(ldexp(Float32(x), q))
+frexp(x::BFloat16) = let (xu, k) = frexp(Float32(x)); (BFloat16(xu), k) end
 
 # Bitstring
 bitstring(x::BFloat16) = bitstring(reinterpret(UInt16, x))
